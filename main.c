@@ -1,40 +1,44 @@
 /*
  * GccApplication1.c
  *
- * Created: 6/19/2021 4:29:15 PM
+ * Created: 6/19/2021 8:49:34 PM
  * Author : C TORCH
  */ 
 
-#include "LCD.h"
-#include "UART.h"
 #include "SPI.h"
+#include "DIO.h"
 #define F_CPU 16000000
 #include <util/delay.h>
 
 
+
 int main(void)
 {
- uint8 data_1 = 0;
- UART_Init();
- LCD_Init();
- 
- uint8 tx_data = 1;
- uint8 rx_data = 0;
- 
- SPI_Master_Init();
- SPI_Master_InitTrans();
- _delay_ms(1000);
- 
+    uint32 tx_data = 2;
+	uint8 rx_data = 0;
+	/*LED*/
+	DIO_SetPinDir(DIO_PORTC,DIO_PIN2,DIO_PIN_OUTPUT);
+	
+	SPI_Slave_Init();
+	
+	_delay_ms(1000);
+	
     while (1) 
     {
-		data_1 = UART_Rx();
-		if (data_1)
+		rx_data = SPI_TransSiver(1);
+		if (rx_data == '1')
+		
 		{
-			LCD_Clear();
-			LCD_WriteChar(data_1);
-			rx_data = SPI_TransSiver(data_1);
-			
+			DIO_TogglePin(DIO_PORTC,DIO_PIN2);
+			_delay_ms(500);
+			rx_data = 0;
 		}
+		if (rx_data =='2')
+		{
+			DIO_SetPinDir(DIO_PORTC,DIO_PIN2,DIO_PIN_HIGH);
+		}
+		
+		_delay_ms(1000);
     }
 }
 
